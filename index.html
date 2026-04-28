@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gamble Forever — A DnD Tavern</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ============ SCREEN: CHARACTER CREATION ============ -->
+    <div id="screen-character" class="screen active">
+      <div class="parchment-panel character-panel">
+        <h1 class="title-fancy">⚔️ Gamble Forever ⚔️</h1>
+        <p class="subtitle">Enter the Tavern of Eternal Fortune</p>
+        <div class="char-form">
+          <label for="char-name">Thy Name, Adventurer:</label>
+          <input type="text" id="char-name" maxlength="20" placeholder="Enter thy name..." autocomplete="off">
+          <label>Choose Thy Class:</label>
+          <div id="class-select" class="class-grid">
+            <div class="class-card" data-class="rogue">
+              <div class="class-icon">🗡️</div>
+              <h3>Rogue</h3>
+              <p class="perk">+10% odds on Dragon's Dice</p>
+            </div>
+            <div class="class-card" data-class="wizard">
+              <div class="class-icon">🔮</div>
+              <h3>Wizard</h3>
+              <p class="perk">Fate's Wheel has extra Jackpot slot</p>
+            </div>
+            <div class="class-card" data-class="warrior">
+              <div class="class-icon">🛡️</div>
+              <h3>Warrior</h3>
+              <p class="perk">+15% Monster Battle win rate</p>
+            </div>
+            <div class="class-card" data-class="bard">
+              <div class="class-icon">🎵</div>
+              <h3>Bard</h3>
+              <p class="perk">2x gold on win streaks (3+)</p>
+            </div>
+          </div>
+          <button id="btn-create" class="btn-gold" disabled>Begin Thy Journey</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: DAILY LOGIN ============ -->
+    <div id="screen-daily" class="screen">
+      <div class="parchment-panel daily-panel">
+        <h2 class="title-fancy">🌅 Daily Bounty</h2>
+        <div id="daily-content">
+          <div id="streak-display">
+            <p>Login Streak: <span id="streak-count">0</span> days</p>
+            <div id="streak-bar"></div>
+          </div>
+          <div id="daily-chest" class="chest-animation">
+            <div class="chest-glow"></div>
+            <div class="chest-icon">🎁</div>
+          </div>
+          <p id="daily-reward-text" class="reward-text"></p>
+          <div id="daily-loot-bonus" class="loot-bonus hidden"></div>
+          <button id="btn-claim-daily" class="btn-gold">Claim Thy Gold!</button>
+          <button id="btn-skip-daily" class="btn-stone hidden">Continue to Tavern</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: TAVERN HUB ============ -->
+    <div id="screen-tavern" class="screen">
+      <div class="tavern-header">
+        <div class="player-bar">
+          <span id="player-name-display" class="player-name"></span>
+          <span id="player-class-display" class="player-class-badge"></span>
+          <span id="player-level-display" class="player-level"></span>
+        </div>
+        <div class="gold-bar">
+          <span class="gold-icon">🪙</span>
+          <span id="gold-display">0</span>
+          <span class="xp-icon">✨</span>
+          <span id="xp-display">0 / 100</span>
+        </div>
+        <div class="tavern-nav">
+          <button class="btn-nav" onclick="showScreen('screen-inventory')">🎒 Loot</button>
+          <button class="btn-nav" onclick="showScreen('screen-stats')">📊 Stats</button>
+        </div>
+      </div>
+      <h2 class="tavern-title">🍺 The Tavern of Eternal Fortune 🍺</h2>
+      <div class="tavern-games">
+        <div class="game-table" data-game="dice" onclick="openGame('dice')">
+          <div class="table-glow"></div>
+          <div class="game-icon">🎲</div>
+          <h3>Dragon's Dice</h3>
+          <p>Roll 2d6 against the house</p>
+          <span class="unlock-badge" id="unlock-dice">Unlocked</span>
+        </div>
+        <div class="game-table" data-game="blackjack" onclick="openGame('blackjack')">
+          <div class="table-glow"></div>
+          <div class="game-icon">🃏</div>
+          <h3>Blackjack of the Abyss</h3>
+          <p>Beat the dealer to 21</p>
+          <span class="unlock-badge" id="unlock-blackjack">Unlocked</span>
+        </div>
+        <div class="game-table" data-game="wheel" onclick="openGame('wheel')">
+          <div class="table-glow"></div>
+          <div class="game-icon">🎡</div>
+          <h3>Fate's Wheel</h3>
+          <p>Spin for glory or ruin</p>
+          <span class="unlock-badge" id="unlock-wheel">Unlocked</span>
+        </div>
+        <div class="game-table" data-game="battle" onclick="openGame('battle')">
+          <div class="table-glow"></div>
+          <div class="game-icon">⚔️</div>
+          <h3>Monster Battle</h3>
+          <p>Bet on a champion</p>
+          <span class="unlock-badge" id="unlock-battle">Level 3</span>
+        </div>
+        <div class="game-table" data-game="chest" onclick="openGame('chest')">
+          <div class="table-glow"></div>
+          <div class="game-icon">🗡️</div>
+          <h3>Dungeon Chests</h3>
+          <p>Treasure or mimic?</p>
+          <span class="unlock-badge" id="unlock-chest">Level 5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: DRAGON'S DICE ============ -->
+    <div id="screen-dice" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+        <div class="gold-bar-mini">🪙 <span class="gold-mini-display">0</span></div>
+      </div>
+      <div class="game-area">
+        <h2 class="game-title">🎲 Dragon's Dice 🎲</h2>
+        <p class="game-desc">Roll 2d6. Beat the house to win!</p>
+        <div class="bet-controls">
+          <label>Wager:</label>
+          <div class="bet-buttons">
+            <button class="btn-bet" onclick="adjustBet('dice', -50)">-50</button>
+            <button class="btn-bet" onclick="adjustBet('dice', -10)">-10</button>
+            <span id="dice-bet" class="bet-amount">50</span>
+            <button class="btn-bet" onclick="adjustBet('dice', 10)">+10</button>
+            <button class="btn-bet" onclick="adjustBet('dice', 50)">+50</button>
+          </div>
+          <div class="quick-bets">
+            <button class="btn-quick" onclick="setBet('dice', 'min')">Min</button>
+            <button class="btn-quick" onclick="setBet('dice', 'half')">Half</button>
+            <button class="btn-quick" onclick="setBet('dice', 'all')">All In</button>
+          </div>
+        </div>
+        <div id="dice-arena" class="dice-arena">
+          <div class="dice-side player-side">
+            <h3>Your Roll</h3>
+            <div class="dice-pair">
+              <div class="die" id="player-die-1">?</div>
+              <div class="die" id="player-die-2">?</div>
+            </div>
+            <p class="dice-total">Total: <span id="player-dice-total">-</span></p>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="dice-side house-side">
+            <h3>House Roll</h3>
+            <div class="dice-pair">
+              <div class="die" id="house-die-1">?</div>
+              <div class="die" id="house-die-2">?</div>
+            </div>
+            <p class="dice-total">Total: <span id="house-dice-total">-</span></p>
+          </div>
+        </div>
+        <button id="btn-roll-dice" class="btn-gold btn-play" onclick="playDice()">🎲 Roll the Dice!</button>
+        <div id="dice-result" class="game-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: BLACKJACK ============ -->
+    <div id="screen-blackjack" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="leaveBlackjack()">← Tavern</button>
+        <div class="gold-bar-mini">🪙 <span class="gold-mini-display">0</span></div>
+      </div>
+      <div class="game-area">
+        <h2 class="game-title">🃏 Blackjack of the Abyss 🃏</h2>
+        <div class="bet-controls" id="bj-bet-controls">
+          <label>Wager:</label>
+          <div class="bet-buttons">
+            <button class="btn-bet" onclick="adjustBet('blackjack', -50)">-50</button>
+            <button class="btn-bet" onclick="adjustBet('blackjack', -10)">-10</button>
+            <span id="blackjack-bet" class="bet-amount">50</span>
+            <button class="btn-bet" onclick="adjustBet('blackjack', 10)">+10</button>
+            <button class="btn-bet" onclick="adjustBet('blackjack', 50)">+50</button>
+          </div>
+          <div class="quick-bets">
+            <button class="btn-quick" onclick="setBet('blackjack', 'min')">Min</button>
+            <button class="btn-quick" onclick="setBet('blackjack', 'half')">Half</button>
+            <button class="btn-quick" onclick="setBet('blackjack', 'all')">All In</button>
+          </div>
+        </div>
+        <div id="bj-table" class="bj-table">
+          <div class="bj-hand dealer-hand">
+            <h3>Dealer <span id="dealer-total"></span></h3>
+            <div id="dealer-cards" class="card-row"></div>
+          </div>
+          <div class="bj-hand player-hand">
+            <h3>Your Hand <span id="player-bj-total"></span></h3>
+            <div id="player-cards" class="card-row"></div>
+          </div>
+        </div>
+        <div id="bj-actions" class="bj-actions">
+          <button id="btn-bj-deal" class="btn-gold btn-play" onclick="startBlackjack()">Deal Cards</button>
+          <button id="btn-bj-hit" class="btn-gold hidden" onclick="blackjackHit()">Hit</button>
+          <button id="btn-bj-stand" class="btn-stone hidden" onclick="blackjackStand()">Stand</button>
+        </div>
+        <div id="bj-result" class="game-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: FATE'S WHEEL ============ -->
+    <div id="screen-wheel" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+        <div class="gold-bar-mini">🪙 <span class="gold-mini-display">0</span></div>
+      </div>
+      <div class="game-area">
+        <h2 class="game-title">🎡 Fate's Wheel 🎡</h2>
+        <div class="bet-controls">
+          <label>Wager:</label>
+          <div class="bet-buttons">
+            <button class="btn-bet" onclick="adjustBet('wheel', -50)">-50</button>
+            <button class="btn-bet" onclick="adjustBet('wheel', -10)">-10</button>
+            <span id="wheel-bet" class="bet-amount">50</span>
+            <button class="btn-bet" onclick="adjustBet('wheel', 10)">+10</button>
+            <button class="btn-bet" onclick="adjustBet('wheel', 50)">+50</button>
+          </div>
+          <div class="quick-bets">
+            <button class="btn-quick" onclick="setBet('wheel', 'min')">Min</button>
+            <button class="btn-quick" onclick="setBet('wheel', 'half')">Half</button>
+            <button class="btn-quick" onclick="setBet('wheel', 'all')">All In</button>
+          </div>
+        </div>
+        <div class="wheel-container">
+          <div class="wheel-pointer">▼</div>
+          <canvas id="wheel-canvas" width="340" height="340"></canvas>
+        </div>
+        <button id="btn-spin" class="btn-gold btn-play" onclick="spinWheel()">🎡 Spin the Wheel!</button>
+        <div id="wheel-result" class="game-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: MONSTER BATTLE ============ -->
+    <div id="screen-battle" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+        <div class="gold-bar-mini">🪙 <span class="gold-mini-display">0</span></div>
+      </div>
+      <div class="game-area">
+        <h2 class="game-title">⚔️ Monster Battle Bet ⚔️</h2>
+        <div class="bet-controls">
+          <label>Wager:</label>
+          <div class="bet-buttons">
+            <button class="btn-bet" onclick="adjustBet('battle', -50)">-50</button>
+            <button class="btn-bet" onclick="adjustBet('battle', -10)">-10</button>
+            <span id="battle-bet" class="bet-amount">50</span>
+            <button class="btn-bet" onclick="adjustBet('battle', 10)">+10</button>
+            <button class="btn-bet" onclick="adjustBet('battle', 50)">+50</button>
+          </div>
+          <div class="quick-bets">
+            <button class="btn-quick" onclick="setBet('battle', 'min')">Min</button>
+            <button class="btn-quick" onclick="setBet('battle', 'half')">Half</button>
+            <button class="btn-quick" onclick="setBet('battle', 'all')">All In</button>
+          </div>
+        </div>
+        <p class="game-desc">Choose your champion!</p>
+        <div id="monster-select" class="monster-grid"></div>
+        <div id="battle-arena" class="battle-arena hidden">
+          <div class="combatant left-fighter">
+            <div id="fighter-left-icon" class="fighter-icon"></div>
+            <div id="fighter-left-name" class="fighter-name"></div>
+            <div class="hp-bar-container">
+              <div id="fighter-left-hp" class="hp-bar"></div>
+            </div>
+            <span id="fighter-left-hp-text" class="hp-text"></span>
+          </div>
+          <div class="vs-emblem">⚔️</div>
+          <div class="combatant right-fighter">
+            <div id="fighter-right-icon" class="fighter-icon"></div>
+            <div id="fighter-right-name" class="fighter-name"></div>
+            <div class="hp-bar-container">
+              <div id="fighter-right-hp" class="hp-bar"></div>
+            </div>
+            <span id="fighter-right-hp-text" class="hp-text"></span>
+          </div>
+        </div>
+        <div id="battle-log" class="battle-log hidden"></div>
+        <button id="btn-fight" class="btn-gold btn-play hidden" onclick="startBattle()">⚔️ Fight!</button>
+        <button id="btn-new-battle" class="btn-gold btn-play hidden" onclick="newBattle()">New Battle</button>
+        <div id="battle-result" class="game-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: DUNGEON CHESTS ============ -->
+    <div id="screen-chest" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+        <div class="gold-bar-mini">🪙 <span class="gold-mini-display">0</span></div>
+      </div>
+      <div class="game-area">
+        <h2 class="game-title">🗡️ Dungeon Chests 🗡️</h2>
+        <p class="game-desc">One holds treasure, one breaks even, one is a mimic!</p>
+        <div class="bet-controls">
+          <label>Wager:</label>
+          <div class="bet-buttons">
+            <button class="btn-bet" onclick="adjustBet('chest', -50)">-50</button>
+            <button class="btn-bet" onclick="adjustBet('chest', -10)">-10</button>
+            <span id="chest-bet" class="bet-amount">50</span>
+            <button class="btn-bet" onclick="adjustBet('chest', 10)">+10</button>
+            <button class="btn-bet" onclick="adjustBet('chest', 50)">+50</button>
+          </div>
+          <div class="quick-bets">
+            <button class="btn-quick" onclick="setBet('chest', 'min')">Min</button>
+            <button class="btn-quick" onclick="setBet('chest', 'half')">Half</button>
+            <button class="btn-quick" onclick="setBet('chest', 'all')">All In</button>
+          </div>
+        </div>
+        <div id="chest-row" class="chest-row">
+          <div class="dungeon-chest" data-chest="0" onclick="pickChest(0)">
+            <div class="chest-body">🎁</div>
+            <p>Chest I</p>
+          </div>
+          <div class="dungeon-chest" data-chest="1" onclick="pickChest(1)">
+            <div class="chest-body">🎁</div>
+            <p>Chest II</p>
+          </div>
+          <div class="dungeon-chest" data-chest="2" onclick="pickChest(2)">
+            <div class="chest-body">🎁</div>
+            <p>Chest III</p>
+          </div>
+        </div>
+        <button id="btn-new-chests" class="btn-gold btn-play hidden" onclick="resetChests()">🗡️ Try Again</button>
+        <div id="chest-result" class="game-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: INVENTORY ============ -->
+    <div id="screen-inventory" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+      </div>
+      <div class="parchment-panel inventory-panel">
+        <h2 class="title-fancy">🎒 Thy Loot</h2>
+        <div id="inventory-grid" class="inventory-grid"></div>
+        <p id="inventory-empty" class="empty-msg">Thy satchel is empty. Win some loot at the tavern!</p>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN: STATS ============ -->
+    <div id="screen-stats" class="screen">
+      <div class="game-header">
+        <button class="btn-back" onclick="showScreen('screen-tavern')">← Tavern</button>
+      </div>
+      <div class="parchment-panel stats-panel">
+        <h2 class="title-fancy">📊 Hall of Records</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Games</div>
+            <div class="stat-value" id="stat-total-games">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Wins</div>
+            <div class="stat-value" id="stat-wins">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Losses</div>
+            <div class="stat-value" id="stat-losses">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-value" id="stat-winrate">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Highest Gold</div>
+            <div class="stat-value" id="stat-peak-gold">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Biggest Win</div>
+            <div class="stat-value" id="stat-biggest-win">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value" id="stat-streak">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Best Streak</div>
+            <div class="stat-value" id="stat-best-streak">0</div>
+          </div>
+        </div>
+        <h3 class="stats-subtitle">Game Breakdown</h3>
+        <div id="game-stats-breakdown" class="stats-breakdown"></div>
+      </div>
+    </div>
+
+    <!-- ============ LEVEL UP MODAL ============ -->
+    <div id="modal-levelup" class="modal hidden">
+      <div class="modal-content parchment-panel">
+        <h2 class="title-fancy">⚡ Level Up! ⚡</h2>
+        <p id="levelup-text"></p>
+        <div id="levelup-unlocks"></div>
+        <button class="btn-gold" onclick="closeLevelUp()">Continue</button>
+      </div>
+    </div>
+
+    <!-- ============ LOOT DROP MODAL ============ -->
+    <div id="modal-loot" class="modal hidden">
+      <div class="modal-content parchment-panel">
+        <h2 class="title-fancy">🎁 Loot Drop!</h2>
+        <div id="loot-item-display" class="loot-reveal"></div>
+        <button class="btn-gold" onclick="closeLootModal()">Nice!</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/game.js"></script>
+  <script src="js/daily.js"></script>
+  <script src="js/dice.js"></script>
+  <script src="js/blackjack.js"></script>
+  <script src="js/wheel.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/chest.js"></script>
+  <script src="js/progression.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
